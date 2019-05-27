@@ -1,12 +1,71 @@
 import React, {Component} from 'react';
-import Post from './Post';
+import User from './User';
+import InstaService from '../services/instaservice.jsx';
+import ErrorMessage from './ErrorMessage';
 
 export default class Posts extends Component {
-	render () {
+	InstaService = new InstaService();
+	state = {
+		posts: [],
+		error: false
+	}
+
+	updatePosts() {
+		this.InstaService.getAllPosts()
+		.then(this.onPostsLoaded)
+		.catch(this.onError)
+	}
+
+	componentDidMount() {
+		this.updatePosts()
+	}
+
+	
+
+	onPostsLoaded = (posts) => {
+		this.setState({
+			posts,
+			error: false
+		});
+	};
+
+	onError = (err) => {
+		this.setState({
+			error: true
+		});
+	};
+
+	renderItems(arr) {
+		return arr.map(item => {
+			const { name, altname, photo, src, alt, descr, id } = item;
+
+			return (
+				<div key={id} className="post">
+					<User src={photo} alt={altname} name={name} min/>
+					<img src={src} alt={alt}></img>
+					<div className="post__name">
+						{name}
+					</div>
+					<div className="post__descr">
+						{descr}
+					</div>
+				</div>
+			)
+		})
+	}
+
+	
+	render() {
+		const { error, posts } = this.state;
+		if (error) {
+			return <ErrorMessage/>
+		}
+
+		const items = this.renderItems(posts);
+
 		return (
 				<div className="left">
-					<Post alt="nature" src="https://images.wallpaperscraft.ru/image/gory_ozero_vershiny_129263_3840x2160.jpg"/>
-					<Post alt="nature" src="https://avatars.mds.yandex.net/get-pdb/1544563/c6b168f0-1002-480d-b1a2-bfe58d3fe5f6/s1200?webp=false"/>
+					{items}
 				</div>
 			)
 	}
